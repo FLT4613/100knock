@@ -1,14 +1,25 @@
-import re
-from sklearn.feature_extraction.text import CountVectorizer
+import pickle
+
 import pandas as pd
-import nltk
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import accuracy_score
 
-train_y_pred = clf.predict(train_x_vec)
-y_pred = clf.predict(test_x_vec)
-score1 = accuracy_score(train_y, train_y_pred)
-score = accuracy_score(test_y, y_pred)
+from q51 import load_data
 
-print(score)
-print(score1)
+
+with open('files/clf.pickle', 'rb') as f:
+    clf = pickle.load(f)
+
+train_x_vec = pd.read_table('files/train.feature.txt', header=None)
+test_x_vec = pd.read_table('files/test.feature.txt', header=None)
+
+_, train_y = load_data('files/train.txt')
+_, test_y = load_data('files/test.txt')
+
+
+def print_score(feature, label):
+    pred_y = clf.predict(feature)
+    print(accuracy_score(label, pred_y))
+
+
+print_score(train_x_vec, train_y)
+print_score(test_x_vec, test_y)
