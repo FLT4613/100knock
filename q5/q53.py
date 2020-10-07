@@ -4,7 +4,7 @@ from sys import argv
 import pickle
 from sklearn.feature_extraction.text import CountVectorizer
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     if not (argv[1] and isinstance(argv[1], str)):
         exit(1)
     with open('files/clf.pickle', 'rb') as f:

@@ -1,11 +1,10 @@
 from sklearn.feature_extraction.text import CountVectorizer
-import re
 
-import nltk
 import pandas as pd
 import pickle
+import spacy
 
-stopwords = nltk.corpus.stopwords.words('english')
+nlp = spacy.load('en_core_web_sm')
 
 
 def load_data(path):
@@ -16,23 +15,18 @@ def load_data(path):
     ]
 
 
-def preprocess(s):
-    s = re.sub(r"[\"\#]", "", s)
-    return re.sub(r'\d+', '0', s)
+def tokenizer(s):
 
-
-def tokenize(s):
-    return [w for w in s.split() if w not in stopwords]
+    doc = nlp(s)
+    return [token.lemma_ for token in doc]
 
 
 cv_args = {
-    'tokenizer': tokenize,
-    'preprocessor': preprocess,
-    'lowercase': True
+    'tokenizer': tokenizer,
 }
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     train_x, train_y = load_data('files/train.txt')
     valid_x, valid_y = load_data('files/valid.txt')
     test_x, test_y = load_data('files/test.txt')

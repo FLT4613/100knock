@@ -3,7 +3,7 @@ from collections import Counter
 from sklearn.model_selection import train_test_split
 whitelist = ['Reuters', 'Huffington Post', 'Businessweek', 'Contactmusic.com', 'Daily Mail']
 
-df = pd.read_csv('files/newsCorpora.csv', delimiter="\t", header=None)
+df = pd.read_csv('files/newsCorpora.csv', delimiter='\t', header=None)
 df = df[df.iloc[:, 3].isin(whitelist)].iloc[:, [1, 4]]
 train, test = train_test_split(df, test_size=0.2)
 valid = test[0::2]
