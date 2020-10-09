@@ -1,34 +1,15 @@
-import spacy
-import pandas as pd
-from pprint import pprint
+import gensim
+from tqdm import tqdm
 import numpy as np
-nlp = spacy.load('files/googlenews_vectors')
-d = {}
-with open('files/questions-words.txt') as f:
-    tmp = []
-    for s in f.readlines():
+
+model = gensim.models.KeyedVectors.load_word2vec_format('files/GoogleNews-vectors-negative300.bin', binary=True)
+
+with open('files/questions-words.txt', encoding='utf-8') as f, open('files/output-q64.txt', 'w', encoding='utf-8') as g:
+    for s in tqdm(f.readlines()):
         if s[0] == ':':
-            if tmp:
-                d[s] = pd.DataFrame(tmp).applymap(nlp)
-                tmp.clear()
+            g.write(s)
         else:
-            tmp.append(s.strip().split())
-
-
-def most_similar(vec):
-    ms = nlp.vocab.vectors.most_similar(
-        np.asarray([vec]),
-        n=1
-    )
-    return [nlp.vocab.strings[w] for w in ms[0][0]][0]
-
-
-def to_vector(nlp):
-    return nlp.vocab.vectors.data
-
-
-for title, dataset in d.items():
-    t = dataset.applymap(to_vector)
-    vec = t[2] - t[1] + t[3]
-    data = pd.merge([dataset.applymap(lambda x: x.text), vec.applymap(most_similar)])
-    pd.concat([title], data).to_csv('files/output-q64.txt', mode='a', header=None, index=None, sep=' ')
+            word_list = s.strip().split()
+            ret = model.most_similar(positive=[word_list[1], word_list[2]], negative=[word_list[0]])
+            word_list.extend([str(x) for x in ret[0]])
+            g.write(' '.join(word_list) + '\n')
