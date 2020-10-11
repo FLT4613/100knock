@@ -1,6 +1,5 @@
 import gensim
 from tqdm import tqdm
-import numpy as np
 
 model = gensim.models.KeyedVectors.load_word2vec_format('files/GoogleNews-vectors-negative300.bin', binary=True)
 

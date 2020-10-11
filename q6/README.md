@@ -14,4 +14,6 @@ model.save_word2vec_format('files/GoogleNews-vectors-negative300.txt', binary=Fa
 gzip files/GoogleNews-vectors-negative300.txt
 python -m spacy init-model en files/googlenews_vectors --vectors-loc files/GoogleNews-vectors-negative300.txt.gz
 curl -o files/questions-words.txt http://download.tensorflow.org/data/questions-words.txt
+curl -o files/wordsim353.zip http://www.gabrilovich.com/resources/data/wordsim353/wordsim353.zip
+unzip files/wordsim353.zip
 ```
