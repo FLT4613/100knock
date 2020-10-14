@@ -1,4 +1,3 @@
-from typing import Sequence
 import numpy as np
 import torch
 import torch.nn as nn
@@ -18,7 +17,7 @@ model = nn.Sequential(*[
 op = optim.SGD(model.parameters(), lr=0.1)
 celoss = nn.CrossEntropyLoss()
 
-epoch = 1000
+epoch = 100
 losses = []
 for i in tqdm(range(epoch)):
     predict = model(train_x)
@@ -30,9 +29,8 @@ for i in tqdm(range(epoch)):
     if i % 10 == 0:
         losses.append(loss.item())
 
-
-# print(losses)
+# q74
 model.eval()
 with torch.no_grad():
     predict = torch.max(model(test_x), 1)
-    print(torch.eq(test_y, predict.indices).sum().item() / len(test_y))
+    print(f'Accuracy: {torch.eq(test_y, predict.indices).sum().item() / len(test_y)}')
