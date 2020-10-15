@@ -7,7 +7,7 @@ nlp = spacy.load('en_core_web_sm')
 
 # 与えられた単語列に対して，ID番号の列を返す関数を実装せよ
 try:
-    with open('q80_output.pickle', 'rb') as f:
+    with open('files/q80_output.pickle', 'rb') as f:
         x = pickle.load(f)
 
 except FileNotFoundError:
@@ -38,5 +38,5 @@ rank = sorted(
     reverse=True
 )
 
-with open('q80_output.pickle', 'wb') as f:
+with open('files/q80_output.pickle', 'wb') as f:
     pickle.dump({x[0]: i if x[1] > 1 else 0 for i, x in enumerate(rank)}, f)

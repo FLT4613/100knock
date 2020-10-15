@@ -22,7 +22,8 @@ for _ in range(1000):
         w.grad.zero_()
 
 # q74
-# mm == matmul
+# mm ≒ matmul
+# https://qiita.com/tand826/items/9e1b6a4de785097fe6a5
 test_y_pred = F.softmax(torch.mm(test_vec_x, w), dim=1)
 pred_labels = pd.DataFrame(test_y_pred).astype('float').apply(lambda x: x.idxmax(), axis=1)
 e = pd.concat([pred_labels, test_vec_y], axis=1)
