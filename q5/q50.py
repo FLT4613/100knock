@@ -5,6 +5,8 @@ whitelist = ['Reuters', 'Huffington Post', 'Businessweek', 'Contactmusic.com', '
 
 df = pd.read_csv('files/newsCorpora.csv', delimiter='\t', header=None)
 df = df[df.iloc[:, 3].isin(whitelist)].iloc[:, [1, 4]]
+df = df[df.iloc[:, 0].str.len() < 150]
+
 train, test = train_test_split(df, test_size=0.2)
 valid = test[0::2]
 test = test[1::2]
