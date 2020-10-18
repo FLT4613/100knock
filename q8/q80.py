@@ -1,3 +1,4 @@
+from pprint import pprint
 import spacy
 import pickle
 from sklearn.feature_extraction.text import CountVectorizer
@@ -18,7 +19,7 @@ except FileNotFoundError:
 
 def tokenizer(s):
     doc = nlp(s)
-    return [token.lemma_ for token in doc if not token.is_stop and 'x' in token.shape_.lower()]
+    return [token.lemma_ for token in doc if not token.is_stop]
 
 
 cv = CountVectorizer(
