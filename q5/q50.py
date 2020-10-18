@@ -8,11 +8,11 @@ df = df[df.iloc[:, 3].isin(whitelist)].iloc[:, [1, 4]]
 df = df[df.iloc[:, 0].str.split().str.len() > 5]
 df = df[df.iloc[:, 0].str.split().str.len() < 16]
 
-train, test = train_test_split(df, test_size=0.2)
-valid = test[0::2]
-test = test[1::2]
+train, test = train_test_split(df, test_size=0.2, stratify=df.iloc[:, 1])
+valid, test = train_test_split(df, test_size=0.5, stratify=df.iloc[:, 1])
 
 print('Train: ' + str(Counter(train.iloc[:, 1])))
+print('Valid: ' + str(Counter(valid.iloc[:, 1])))
 print('Test: ' + str(Counter(test.iloc[:, 1])))
 
 train.to_csv('files/train.txt', header=None, index=False, sep='\t')
