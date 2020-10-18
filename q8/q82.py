@@ -58,16 +58,16 @@ class Net(nn.Module):
 train_dataset = get_dataset('files/train.txt')
 test_dataset = get_dataset('files/test.txt')
 
-batch_size = 10
+batch_size = 1
 d_w = 300
 d_h = 50
 L = 4
 
 rnn = Net(d_w, d_h, L)
 loss_function = nn.NLLLoss()
-op = optim.SGD(rnn.parameters(), lr=0.075)
+op = optim.SGD(rnn.parameters(), lr=0.001)
 losses = []
-epoch = 50
+epoch = 10
 
 for e in range(epoch):
     rnn.train()
@@ -79,8 +79,6 @@ for e in range(epoch):
         loss = loss_function(predict, y_batch)
         loss.backward()
         op.step()
-        # with torch.no_grad():
-        #     losses.append(loss.item())
 
     rnn.eval()
     with torch.no_grad():
