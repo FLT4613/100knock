@@ -39,4 +39,4 @@ rank = sorted(
 )
 
 with open('files/q80_output.pickle', 'wb') as f:
-    pickle.dump({x[0]: i if x[1] > 1 else 0 for i, x in enumerate(rank)}, f)
+    pickle.dump({x[0]: i if x[1] > 1 else 0 for i, x in enumerate(rank, start=1)}, f)
