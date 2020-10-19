@@ -72,8 +72,7 @@ epoch = 10
 for e in range(epoch):
     rnn.train()
     dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    progress = tqdm(enumerate(dataloader), total=len(dataloader))
-    for count, (x_batch, y_batch) in progress:
+    for x_batch, y_batch in tqdm(dataloader, total=len(dataloader)):
         predict = rnn(x_batch)
         op.zero_grad()
         loss = loss_function(predict, y_batch)
