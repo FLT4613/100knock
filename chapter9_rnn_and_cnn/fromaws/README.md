@@ -1,1 +1,0 @@
-source activate pytorch_latest_p36

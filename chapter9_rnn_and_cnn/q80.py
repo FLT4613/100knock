@@ -5,16 +5,6 @@ import pandas as pd
 
 nlp = spacy.load('en_core_web_sm')
 
-# 与えられた単語列に対して，ID番号の列を返す関数を実装せよ
-try:
-    with open('files/q80_output.pickle', 'rb') as f:
-        x = pickle.load(f)
-
-except FileNotFoundError:
-    pass
-
-# 学習データ中で2回以上出現する単語にID番号を付与せよ
-
 
 def tokenizer(s):
     doc = nlp(s)

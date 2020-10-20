@@ -13,14 +13,9 @@ with open('files/q80_output.pickle', 'rb') as f:
     idlist = pickle.load(f)
 
 
-with open('files/vocabulary.pickle', 'rb') as f:
-    # from q52
-    voc = pickle.load(f)
-
-
 def to_idlist(s):
     # q80: 与えられた単語列に対して，ID番号の列を返す関数を実装せよ
-    return [idlist.get(w, 0) for w in s]
+    return [idlist.get(w, 0) for w in s.split()]
 
 
 d_w = 300
@@ -49,7 +44,7 @@ def y(h_T):
 train = pd.read_csv('files/train.txt', delimiter='\t', header=None).iloc[:, 0]
 id_list = sorted(train.apply(to_idlist).tolist(), key=lambda x: len(x), reverse=True)
 max_size = len(id_list[0])
-emb = nn.Embedding(len(voc), d_w, padding_idx=0)
+emb = nn.Embedding(len(id_list), d_w, padding_idx=0)
 x = torch.tensor([(x + [0] * (max_size - len(x))) for x in id_list])[0]
 
 # fitting
