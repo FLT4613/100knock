@@ -18,7 +18,8 @@ vocab_len = len({k: v for k, v in idlist.items() if v > 0})+1
 
 def to_idlist(s):
     # q80: 与えられた単語列に対して，ID番号の列を返す関数を実装せよ
-    return [idlist.get(w, 0) for w in s]
+
+    return [idlist.get(w, 0) for w in s.split()]
 
 
 # preprocess

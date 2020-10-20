@@ -7,13 +7,19 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 from torch.utils.data import DataLoader, TensorDataset
-# https://pytorch.org/docs/stable/generated/torch.set_printoptions.html#torch-set-printoptions
-# 指数表記を無効にする
-# torch.set_printoptions(sci_mode=False)
+
+if torch.cuda.is_available():
+    device = torch.device('cuda')
+else:
+    device = torch.device('cpu')
 
 with open('files/q80_output.pickle', 'rb') as f:
     idlist = pickle.load(f)
-vocab_len = len({k: v for k, v in idlist.items() if v > 0})+1
+
+
+with open('files/vocabulary.pickle', 'rb') as f:
+    # from q52
+    voc = pickle.load(f)
 
 
 def to_idlist(s):
@@ -26,11 +32,11 @@ def get_dataset(path):
     mapping = ['b', 't', 'e', 'm']
     table = pd.read_csv(path, delimiter='\t', header=None)
     table.iloc[:, 0] = table.iloc[:, 0].apply(to_idlist)
-    table.iloc[:, 1] = table.iloc[:, 1].apply(mapping.index)
-    max_size = table.iloc[:, 0].apply(len).max()
+    table.iloc[:, 1] = table.iloc[:, 1].apply(lambda x: mapping.index(x))
+    max_size = table.iloc[:, 0].apply(lambda x: len(x)).max()
     table.iloc[:, 0] = table.iloc[:, 0].apply(lambda x: [0] * (max_size - len(x)) + x)
-    x = torch.tensor(table.iloc[:, 0])
-    y = torch.tensor(table.iloc[:, 1])
+    x = torch.tensor(table.iloc[:, 0]).to(device)
+    y = torch.tensor(table.iloc[:, 1]).to(device)
     return TensorDataset(x, y)
 
 
@@ -38,7 +44,7 @@ class Net(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(Net, self).__init__()
         self.hidden_size = hidden_size
-        self.embedding = nn.Embedding(vocab_len, input_size, padding_idx=0)
+        self.embedding = nn.Embedding(len(voc), input_size, padding_idx=0)
         self.rnn = nn.RNN(input_size, hidden_size, batch_first=True)
         self.linear = nn.Linear(hidden_size, output_size)
         self.softmax = nn.LogSoftmax(dim=1)
@@ -46,22 +52,24 @@ class Net(nn.Module):
     def forward(self, input):
         x = self.embedding(input)
         _, h = self.rnn(x)
-        y = self.softmax(self.linear(h.squeeze(0)))
+        # 系列の最後の隠れ状態を使う
+        y = self.softmax(self.linear(h[0]))
         return y
 
 
 train_dataset = get_dataset('files/train.txt')
 test_dataset = get_dataset('files/test.txt')
 
-batch_size = 100
+batch_size = 10
 d_w = 300
-d_h = 128
+d_h = 50
 L = 4
-rnn = Net(d_w, d_h, L)
+
+rnn = Net(d_w, d_h, L).to(device)
 loss_function = nn.NLLLoss()
 op = optim.SGD(rnn.parameters(), lr=0.01)
 losses = []
-epoch = 10
+epoch = 1000
 
 for e in range(epoch):
     rnn.train()

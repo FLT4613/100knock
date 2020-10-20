@@ -3,7 +3,7 @@ import pickle
 from sklearn.feature_extraction.text import CountVectorizer
 import pandas as pd
 
-nlp = spacy.load('en_core_web_sm')
+nlp = spacy.load('/home/ubuntu/anaconda3/lib/python3.7/site-packages/en_core_web_sm/en_core_web_sm-2.3.1')
 
 # 与えられた単語列に対して，ID番号の列を返す関数を実装せよ
 try:
