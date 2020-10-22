@@ -102,10 +102,8 @@ def q37():
 
 
 def q38_q39():
-    rank = sorted(Counter([d['surface']
-                           for d in data]).items(), key=lambda x: x[1])
-    res = [(x[0], len(list(x[1])))
-           for x in groupby(rank, key=lambda x: x[1])]
+    rank = sorted(Counter([d['surface'] for d in data]).items(), key=lambda x: x[1])
+    res = [(x[0], len(list(x[1]))) for x in groupby(rank, key=lambda x: x[1])]
     y = [d[1] for d in res]
     # q39
     plt.hist(y)
