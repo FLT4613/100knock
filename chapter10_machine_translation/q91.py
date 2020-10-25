@@ -1,12 +1,12 @@
 # https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
 # https://huggingface.co/Helsinki-NLP/opus-mt-ja-en
-import numpy as np
+# https://huggingface.co/transformers/model_doc/marian.html#marianmt
+
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from transformers import (AutoModelForSeq2SeqLM, AutoTokenizer)
+from transformers import (AutoModelForSeq2SeqLM, AutoTokenizer, AdamW)
 
-# q83
 if torch.cuda.is_available():
     device = torch.device('cuda')
 else:
@@ -17,6 +17,7 @@ class Trainer:
     def __init__(self, model, optimizer):
         self.model = model.to(device)
         self.optimizer = optimizer
+        self.tokenizer = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-ja-en")
 
     def train(self, train_dataset, tune_dataset, epoch, batch_size):
         for _ in range(epoch):
@@ -32,31 +33,30 @@ class Trainer:
             self.model.eval()
             with torch.no_grad():
                 train_dataloader = DataLoader(train_dataset, batch_size=batch_size)
-                train_losses = []
-                train_accuracy = []
-                for x_batch, y_batch in train_dataloader:
-                    train_cfg = tokenizer.prepare_seq2seq_batch(x_batch, y_batch).to(device)
-                    train_loss, train_logit, _ = self.model(**train_cfg)
-                    train_losses.append(train_loss.item())
-                    train_predict = torch.max(train_logit, 2)
-                    for label, predict in zip(train_cfg.labels, train_predict.indices):
-                        train_accuracy.append(torch.eq(label, predict).sum().item() / predict.shape[0])
+                train_loss, train_accuracy = self._eval(train_dataloader)
 
                 tune_dataloader = DataLoader(tune_dataset, batch_size=batch_size)
-                tune_losses = []
-                tune_accuracy = []
-                for x_batch, y_batch in tune_dataloader:
-                    tune_cfg = tokenizer.prepare_seq2seq_batch(x_batch, y_batch).to(device)
-                    tune_loss, tune_logit, _ = self.model(**tune_cfg)
-                    tune_losses.append(tune_loss.item())
-                    tune_predict = torch.max(tune_logit, 2)
-                    for label, predict in zip(tune_cfg.labels, tune_predict.indices):
-                        tune_accuracy.append(torch.eq(label, predict).sum().item() / predict.shape[0])
+                tune_loss, tune_accuracy = self._eval(tune_dataloader)
 
-                print(f'Train Loss\t: {np.array(train_losses).mean()}')
-                print(f'Train Accuracy\t: {np.average(train_accuracy)}')
-                print(f'Tune Loss\t: {np.array(tune_losses).mean()}')
-                print(f'Tune Accuracy\t: {np.average(tune_accuracy)}')
+                print(f'Train Loss\t: {train_loss}')
+                print(f'Train Accuracy\t: {train_accuracy}')
+                print(f'Tune Loss\t: {tune_loss}')
+                print(f'Tune Accuracy\t: {tune_accuracy}')
+
+        torch.save(model.to('cpu').state_dict(), 'files/model.pth')
+        model.to(device)
+
+    def _eval(self, dataloader):
+        losses = torch.tensor(0.)
+        accuracies = torch.tensor(0.)
+        for x_batch, y_batch in dataloader:
+            cfg = tokenizer.prepare_seq2seq_batch(x_batch, y_batch).to(device)
+            loss, _, _ = self.model(**cfg)
+            losses += loss
+            predict = self.model.generate(**cfg)
+            predict_str = self.tokenizer.batch_decode(predict, skip_special_tokens=True)
+            accuracies += sum(x.strip() == y for x, y in zip(y_batch, predict_str))
+        return (losses / len(dataloader)).item(), (accuracies / len(dataloader)).item()
 
 
 if __name__ == "__main__":
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-ja-en")
     model = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-ja-en")
 
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
+    optimizer = AdamW(model.parameters(), lr=0.001)
     trainer = Trainer(
         model=model,
         optimizer=optimizer
