@@ -47,8 +47,8 @@ class Trainer:
         model.to(device)
 
     def _eval(self, dataloader):
-        losses = torch.tensor(0.)
-        accuracies = torch.tensor(0.)
+        losses = torch.tensor(0.).to(device)
+        accuracies = torch.tensor(0.).to(device)
         for x_batch, y_batch in dataloader:
             cfg = tokenizer.prepare_seq2seq_batch(x_batch, y_batch).to(device)
             loss, _, _ = self.model(**cfg)
